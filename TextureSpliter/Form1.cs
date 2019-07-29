@@ -32,9 +32,15 @@ namespace WindowsFormsApplication1
                 string atlasFilePath = System.IO.Path.GetFullPath(openFileDialog_selAtlas.FileName);
                 textBox_atlasPath.Text = atlasFilePath;
                 //预测数据文件在同目录下，文件名相同
-                textBox_dataPath.Text = this.CutEndStr(atlasFilePath, ".png", ".json");
+                if (string.IsNullOrEmpty(textBox_dataPath.Text))
+                {
+                    textBox_dataPath.Text = this.CutEndStr(atlasFilePath, ".png", ".json");
+                }
                 //预测输出在同目录下的output子目录下
-                textBox_outputPath.Text = System.IO.Path.GetDirectoryName(atlasFilePath) + "\\output";
+                if (string.IsNullOrEmpty(textBox_outputPath.Text))
+                {
+                    textBox_outputPath.Text = System.IO.Path.GetDirectoryName(atlasFilePath) + "\\output";
+                }
             }
         }
 
@@ -67,10 +73,34 @@ namespace WindowsFormsApplication1
         //解析并输出
         private void button_operation_Click(object sender, EventArgs e)
         {
+            string atlasPath = textBox_atlasPath.Text;
+            string dataPath = textBox_dataPath.Text;
             string aimFolderPath = textBox_outputPath.Text;
-            if (aimFolderPath != "")
+
+            int invalidCode = 0;
+            string invalidInfo = "";
+
+            //检查合法性
+            do
             {
-                bool checkRst = false;
+                if (string.IsNullOrEmpty(atlasPath))
+                {
+                    invalidCode = 1;
+                    invalidInfo = "图集路径不可为空";
+                    break;
+                }
+                if (string.IsNullOrEmpty(dataPath))
+                {
+                    invalidCode = 2;
+                    invalidInfo = "数据路径不可为空";
+                    break;
+                }
+                if (string.IsNullOrEmpty(aimFolderPath))
+                {
+                    invalidCode = 3;
+                    invalidInfo = "输出路径不可为空";
+                    break;
+                }
 
                 //检查目标目录是否存在，不存在则创建
                 try
@@ -79,37 +109,76 @@ namespace WindowsFormsApplication1
                     {
                         Directory.CreateDirectory(aimFolderPath);
                     }
-                    checkRst = true;
                 }
                 catch (Exception folderException)
                 {
-                    checkRst = false;
+                    invalidCode = 4;
+                    break;
                 }
 
-                if (!checkRst)
-                {
-                    MessageBox.Show("解析出错", "提示", MessageBoxButtons.OK);
-                    return;
-                }
-                TextReader file = File.OpenText(textBox_dataPath.Text);
-                JsonTextReader reader = new JsonTextReader(file);
-                JObject obj = JToken.ReadFrom(reader) as JObject;
-                string imgFileName = obj["file"].ToString();
-                string framesStr = obj["frames"].ToString();
+                break;
 
-                Dictionary<string, JsonFrameData> frameDict = new Dictionary<string, JsonFrameData> { };
-                frameDict = JsonConvert.DeserializeObject<Dictionary<string, JsonFrameData>>(framesStr);
-                foreach (var item in frameDict)
+            } while (true);
+
+
+            if (0 != invalidCode)
+            {
+                string info = "哦豁~出错了." + invalidInfo + "\r\n" + "错误码：" + invalidCode;
+                MessageBox.Show(info, "提示", MessageBoxButtons.OK);
+                return;
+            }
+
+            button_operation.Enabled = false;
+
+            int successNum = 0;
+            int failedNum = 0;
+            using (StreamReader file = File.OpenText(dataPath))
+            {
+                JsonSerializer se = new JsonSerializer();
+                JsonData jsonData = se.Deserialize(file, typeof(JsonData)) as JsonData;
+                foreach (var item in jsonData.frames)
                 {
                     JsonFrameData curFrameData = item.Value as JsonFrameData;
                     string outImgName = this.CutEndStr(item.Key, "_png", ".png");
-                    ClipImage(textBox_atlasPath.Text, aimFolderPath + "\\" + outImgName, curFrameData.x, curFrameData.y, curFrameData.w, curFrameData.h);
+                    bool rst = ClipImage(atlasPath, aimFolderPath + "\\" + outImgName, curFrameData.x, curFrameData.y, curFrameData.w, curFrameData.h);
+                    if (rst)
+                    {
+                        ++successNum;
+                    }
+                    else
+                    {
+                        ++failedNum;
+                    }
                 }
+            }
 
-                if (MessageBox.Show("解析成功！\r\n是否打开输出文件夹？", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            string parseMsg = "";
+            if(failedNum <= 0)
+            {
+                parseMsg = "解析成功！";
+            }
+            else
+            {
+                parseMsg = "解析成功" + successNum + "条，失败"+ failedNum + "条";
+            }
+            if (successNum > 0)
+            {
+                parseMsg += "\r\n是否打开输出文件夹？";
+            }
+            
+            DialogResult msgboxRst = MessageBox.Show(parseMsg, "提示", MessageBoxButtons.YesNo);
+            if (DialogResult.Yes == msgboxRst)
+            {
+                button_operation.Enabled = true;
+
+                if (successNum > 0)
                 {
                     System.Diagnostics.Process.Start("explorer.exe", aimFolderPath);
                 }
+            }
+            else if(DialogResult.No == msgboxRst)
+            {
+                button_operation.Enabled = true;
             }
         }
 
@@ -123,8 +192,9 @@ namespace WindowsFormsApplication1
         /// <param name="width">保存图片的宽度</param>
         /// <param name="height">保存图片的高度</param>
         /// <returns></returns>
-        private void ClipImage(string fromImagePath, string toImagePath, int offsetX, int offsetY, int width, int height)
+        private bool ClipImage(string fromImagePath, string toImagePath, int offsetX, int offsetY, int width, int height)
         {
+            bool rst = false;
             try
             {
                 Bitmap src = new Bitmap(fromImagePath);
@@ -132,13 +202,15 @@ namespace WindowsFormsApplication1
                 output.Save(toImagePath, ImageFormat.Png);
                 output.Dispose();
                 src.Dispose();
+
+                rst = true;
             }
             catch (Exception)
             {
-
-                throw;
+                rst = false;
             }
 
+            return rst;
         }
 
         
@@ -188,5 +260,11 @@ namespace WindowsFormsApplication1
         public int sourceW { get; set; }
         public int sourceH { get; set; }
 
+    }
+
+    public class JsonData
+    {
+        public string file { get; set; }
+        public Dictionary<string, JsonFrameData> frames { get; set; }
     }
 }
