@@ -1,2 +1,18 @@
 # TextureSpliter
-Spliter the atlas of TextureMerger output from egret
+
+将由白鹭TextureMerger软件打包输出的png文件和json文件，反向解析出单个图片，方便二次修改。
+
+---
+
+# ChangeLog
+
+## 1.0.1 / 2019-07-25
+
+- 输入默认目录设置为我的文档
+- 显示起始位置设置为屏幕中部
+- 增加自定义icon
+
+## 1.0.0 / 2019-07-24
+
+- 基本功能实现
+
