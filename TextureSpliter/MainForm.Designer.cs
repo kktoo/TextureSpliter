@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApplication1
+﻿namespace spliter
 {
     partial class Form_Main
     {
@@ -42,14 +42,17 @@
             this.label_output_path = new System.Windows.Forms.Label();
             this.textBox_outputPath = new System.Windows.Forms.TextBox();
             this.button_selOutput = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label_introduce = new System.Windows.Forms.Label();
+            this.label_authorInfo = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.label_version = new System.Windows.Forms.Label();
+            this.progressBar_operation = new System.Windows.Forms.ProgressBar();
+            this.button_clean = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button_selAtlas
             // 
-            this.button_selAtlas.Location = new System.Drawing.Point(424, 55);
+            this.button_selAtlas.Location = new System.Drawing.Point(424, 41);
             this.button_selAtlas.Name = "button_selAtlas";
             this.button_selAtlas.Size = new System.Drawing.Size(75, 23);
             this.button_selAtlas.TabIndex = 2;
@@ -59,7 +62,7 @@
             // 
             // button_selData
             // 
-            this.button_selData.Location = new System.Drawing.Point(424, 119);
+            this.button_selData.Location = new System.Drawing.Point(424, 105);
             this.button_selData.Name = "button_selData";
             this.button_selData.Size = new System.Drawing.Size(75, 23);
             this.button_selData.TabIndex = 4;
@@ -69,7 +72,7 @@
             // 
             // button_operation
             // 
-            this.button_operation.Location = new System.Drawing.Point(234, 241);
+            this.button_operation.Location = new System.Drawing.Point(160, 236);
             this.button_operation.Name = "button_operation";
             this.button_operation.Size = new System.Drawing.Size(75, 23);
             this.button_operation.TabIndex = 0;
@@ -80,7 +83,7 @@
             // label_atlas
             // 
             this.label_atlas.AutoSize = true;
-            this.label_atlas.Location = new System.Drawing.Point(15, 29);
+            this.label_atlas.Location = new System.Drawing.Point(15, 15);
             this.label_atlas.Name = "label_atlas";
             this.label_atlas.Size = new System.Drawing.Size(77, 12);
             this.label_atlas.TabIndex = 3;
@@ -89,7 +92,7 @@
             // label_data
             // 
             this.label_data.AutoSize = true;
-            this.label_data.Location = new System.Drawing.Point(15, 95);
+            this.label_data.Location = new System.Drawing.Point(15, 81);
             this.label_data.Name = "label_data";
             this.label_data.Size = new System.Drawing.Size(77, 12);
             this.label_data.TabIndex = 4;
@@ -105,14 +108,14 @@
             // 
             // textBox_atlasPath
             // 
-            this.textBox_atlasPath.Location = new System.Drawing.Point(86, 57);
+            this.textBox_atlasPath.Location = new System.Drawing.Point(86, 43);
             this.textBox_atlasPath.Name = "textBox_atlasPath";
             this.textBox_atlasPath.Size = new System.Drawing.Size(332, 21);
             this.textBox_atlasPath.TabIndex = 1;
             // 
             // textBox_dataPath
             // 
-            this.textBox_dataPath.Location = new System.Drawing.Point(86, 121);
+            this.textBox_dataPath.Location = new System.Drawing.Point(86, 107);
             this.textBox_dataPath.Name = "textBox_dataPath";
             this.textBox_dataPath.Size = new System.Drawing.Size(332, 21);
             this.textBox_dataPath.TabIndex = 3;
@@ -120,7 +123,7 @@
             // label_output_path
             // 
             this.label_output_path.AutoSize = true;
-            this.label_output_path.Location = new System.Drawing.Point(15, 159);
+            this.label_output_path.Location = new System.Drawing.Point(15, 145);
             this.label_output_path.Name = "label_output_path";
             this.label_output_path.Size = new System.Drawing.Size(53, 12);
             this.label_output_path.TabIndex = 4;
@@ -128,14 +131,14 @@
             // 
             // textBox_outputPath
             // 
-            this.textBox_outputPath.Location = new System.Drawing.Point(86, 185);
+            this.textBox_outputPath.Location = new System.Drawing.Point(86, 171);
             this.textBox_outputPath.Name = "textBox_outputPath";
             this.textBox_outputPath.Size = new System.Drawing.Size(332, 21);
             this.textBox_outputPath.TabIndex = 5;
             // 
             // button_selOutput
             // 
-            this.button_selOutput.Location = new System.Drawing.Point(424, 183);
+            this.button_selOutput.Location = new System.Drawing.Point(424, 169);
             this.button_selOutput.Name = "button_selOutput";
             this.button_selOutput.Size = new System.Drawing.Size(75, 23);
             this.button_selOutput.TabIndex = 6;
@@ -143,42 +146,74 @@
             this.button_selOutput.UseVisualStyleBackColor = true;
             this.button_selOutput.Click += new System.EventHandler(this.button_selOutput_Click);
             // 
-            // label1
+            // label_introduce
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(15, 303);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(485, 12);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "功能：将由白鹭TextureMerger打包的png文件和json文件解析出单个图片，方便二次修改。";
+            this.label_introduce.AutoSize = true;
+            this.label_introduce.Location = new System.Drawing.Point(10, 308);
+            this.label_introduce.Name = "label_introduce";
+            this.label_introduce.Size = new System.Drawing.Size(365, 12);
+            this.label_introduce.TabIndex = 8;
+            this.label_introduce.Text = "说明：白鹭图集软件TextureMerger的反向解析工具，方便二次修改.";
             // 
-            // label2
+            // label_authorInfo
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 325);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 12);
-            this.label2.TabIndex = 9;
-            this.label2.Text = "如有问题请联系作者";
+            this.label_authorInfo.AutoSize = true;
+            this.label_authorInfo.Location = new System.Drawing.Point(298, 341);
+            this.label_authorInfo.Name = "label_authorInfo";
+            this.label_authorInfo.Size = new System.Drawing.Size(101, 12);
+            this.label_authorInfo.TabIndex = 9;
+            this.label_authorInfo.Text = "如有问题联系作者";
             // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(134, 325);
+            this.linkLabel1.Location = new System.Drawing.Point(403, 341);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(83, 12);
+            this.linkLabel1.Size = new System.Drawing.Size(119, 12);
             this.linkLabel1.TabIndex = 10;
             this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "www.kktoo.net";
+            this.linkLabel1.Text = "http://kktoo.com";
+            // 
+            // label_version
+            // 
+            this.label_version.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_version.AutoSize = true;
+            this.label_version.Location = new System.Drawing.Point(12, 341);
+            this.label_version.Name = "label_version";
+            this.label_version.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.label_version.Size = new System.Drawing.Size(41, 12);
+            this.label_version.TabIndex = 11;
+            this.label_version.Text = "v1.0.0";
+            this.label_version.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // progressBar_operation
+            // 
+            this.progressBar_operation.Location = new System.Drawing.Point(12, 277);
+            this.progressBar_operation.Name = "progressBar_operation";
+            this.progressBar_operation.Size = new System.Drawing.Size(510, 6);
+            this.progressBar_operation.TabIndex = 12;
+            // 
+            // button_clean
+            // 
+            this.button_clean.Location = new System.Drawing.Point(300, 236);
+            this.button_clean.Name = "button_clean";
+            this.button_clean.Size = new System.Drawing.Size(75, 23);
+            this.button_clean.TabIndex = 13;
+            this.button_clean.Text = "清空";
+            this.button_clean.UseVisualStyleBackColor = true;
+            this.button_clean.Click += new System.EventHandler(this.button_clean_Click);
             // 
             // Form_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(534, 362);
+            this.Controls.Add(this.button_clean);
+            this.Controls.Add(this.progressBar_operation);
+            this.Controls.Add(this.label_version);
             this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.label_authorInfo);
+            this.Controls.Add(this.label_introduce);
             this.Controls.Add(this.button_selOutput);
             this.Controls.Add(this.textBox_outputPath);
             this.Controls.Add(this.textBox_dataPath);
@@ -194,7 +229,8 @@
             this.MaximizeBox = false;
             this.Name = "Form_Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "TextureSpliter";
+            this.Text = "Texture Spliter";
+            this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -215,9 +251,12 @@
         private System.Windows.Forms.Label label_output_path;
         private System.Windows.Forms.TextBox textBox_outputPath;
         private System.Windows.Forms.Button button_selOutput;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_introduce;
+        private System.Windows.Forms.Label label_authorInfo;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.Label label_version;
+        private System.Windows.Forms.ProgressBar progressBar_operation;
+        private System.Windows.Forms.Button button_clean;
     }
 }
 

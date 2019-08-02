@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
-namespace WindowsFormsApplication1
+namespace spliter
 {
     public partial class Form_Main : Form
     {
@@ -21,30 +14,39 @@ namespace WindowsFormsApplication1
             InitializeComponent();
         }
 
-        //选择图集文件
+        /// <summary>
+        /// 按钮事件-选择图集文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_selAtlas_Click(object sender, EventArgs e)
         {
             openFileDialog_selAtlas.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);//"E:/wkrm_donet/input/";
             openFileDialog_selAtlas.Filter = "图集文件|*.png";
             openFileDialog_selAtlas.RestoreDirectory = false;
-            if(openFileDialog_selAtlas.ShowDialog() == DialogResult.OK)
+            if (openFileDialog_selAtlas.ShowDialog() == DialogResult.OK)
             {
                 string atlasFilePath = System.IO.Path.GetFullPath(openFileDialog_selAtlas.FileName);
+                string atlasFileNameWithoutExtension = Path.GetFileNameWithoutExtension(openFileDialog_selAtlas.FileName);
                 textBox_atlasPath.Text = atlasFilePath;
                 //预测数据文件在同目录下，文件名相同
-                if (string.IsNullOrEmpty(textBox_dataPath.Text))
+                //if (string.IsNullOrEmpty(textBox_dataPath.Text))
                 {
                     textBox_dataPath.Text = this.CutEndStr(atlasFilePath, ".png", ".json");
                 }
                 //预测输出在同目录下的output子目录下
-                if (string.IsNullOrEmpty(textBox_outputPath.Text))
+                //if (string.IsNullOrEmpty(textBox_outputPath.Text))
                 {
-                    textBox_outputPath.Text = System.IO.Path.GetDirectoryName(atlasFilePath) + "\\output";
+                    textBox_outputPath.Text = System.IO.Path.GetDirectoryName(atlasFilePath) + "\\" + atlasFileNameWithoutExtension + "_output";
                 }
             }
         }
 
-        //选择json数据文件
+        /// <summary>
+        /// 按钮事件-选择json数据文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_selData_Click(object sender, EventArgs e)
         {
             openFileDialog_selData.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);//"E:/wkrm_donet/input/";
@@ -57,7 +59,11 @@ namespace WindowsFormsApplication1
             }
         }
 
-        //选择输出目标文件夹
+        /// <summary>
+        /// 按钮事件-选择输出目标文件夹
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_selOutput_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog_selOutput.ShowDialog() == DialogResult.OK)
@@ -70,13 +76,45 @@ namespace WindowsFormsApplication1
             }
         }
 
-        //解析并输出
+        /// <summary>
+        /// 按钮事件-解析并输出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_operation_Click(object sender, EventArgs e)
         {
-            string atlasPath = textBox_atlasPath.Text;
-            string dataPath = textBox_dataPath.Text;
-            string aimFolderPath = textBox_outputPath.Text;
+            this.DoParseOperation(textBox_atlasPath.Text, textBox_dataPath.Text, textBox_outputPath.Text);
+        }
 
+        /// <summary>
+        /// 按钮事件-清空
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button_clean_Click(object sender, EventArgs e)
+        {
+            textBox_atlasPath.Text = textBox_dataPath.Text = textBox_outputPath.Text = string.Empty;
+        }
+
+        /// <summary>
+        /// 载入事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnFormLoad(object sender, EventArgs e)
+        {
+            //设置版本号显示内容
+            label_version.Text = "版本" + Application.ProductVersion;
+
+            //设置初始状态
+            this.SetCanOperation(true);
+        }
+
+        /// <summary>
+        /// 执行解析操作
+        /// </summary>
+        private void DoParseOperation(string atlasPath, string dataPath, string aimFolderPath)
+        {
             int invalidCode = 0;
             string invalidInfo = "";
 
@@ -128,7 +166,8 @@ namespace WindowsFormsApplication1
                 return;
             }
 
-            button_operation.Enabled = false;
+            //禁用解析操作，避免等待期连续点击
+            this.SetCanOperation(false);
 
             int successNum = 0;
             int failedNum = 0;
@@ -136,10 +175,17 @@ namespace WindowsFormsApplication1
             {
                 JsonSerializer se = new JsonSerializer();
                 JsonData jsonData = se.Deserialize(file, typeof(JsonData)) as JsonData;
+                int processMaxNum = jsonData.frames.Count;
                 foreach (var item in jsonData.frames)
                 {
                     JsonFrameData curFrameData = item.Value as JsonFrameData;
+                    //如果json中的frame name有扩展名，则替换扩展名格式
                     string outImgName = this.CutEndStr(item.Key, "_png", ".png");
+                    //如果json中的frame name没有扩展名，则追加扩展名
+                    if (!outImgName.EndsWith(".png"))
+                    {
+                        outImgName += ".png";
+                    }
                     bool rst = ClipImage(atlasPath, aimFolderPath + "\\" + outImgName, curFrameData.x, curFrameData.y, curFrameData.w, curFrameData.h);
                     if (rst)
                     {
@@ -149,37 +195,65 @@ namespace WindowsFormsApplication1
                     {
                         ++failedNum;
                     }
+                    //更新进度条数据 TODO:改成异步方式
+                    int percentNum = 0;
+                    if (processMaxNum > 0)
+                    {
+                        percentNum = (int)(((float)(successNum + failedNum) / (float)processMaxNum) * 100);
+                    }
+                    this.SetOperationProcess(percentNum);
                 }
             }
 
             string parseMsg = "";
-            if(failedNum <= 0)
+            if (failedNum <= 0)
             {
                 parseMsg = "解析成功！";
             }
             else
             {
-                parseMsg = "解析成功" + successNum + "条，失败"+ failedNum + "条";
+                parseMsg = "解析成功" + successNum + "条，失败" + failedNum + "条";
             }
             if (successNum > 0)
             {
                 parseMsg += "\r\n是否打开输出文件夹？";
             }
-            
+
             DialogResult msgboxRst = MessageBox.Show(parseMsg, "提示", MessageBoxButtons.YesNo);
             if (DialogResult.Yes == msgboxRst)
             {
-                button_operation.Enabled = true;
+                this.SetCanOperation(true);
 
                 if (successNum > 0)
                 {
+                    //调用文件管理器打开目标文件夹
                     System.Diagnostics.Process.Start("explorer.exe", aimFolderPath);
                 }
             }
-            else if(DialogResult.No == msgboxRst)
+            else if (DialogResult.No == msgboxRst)
             {
-                button_operation.Enabled = true;
+                this.SetCanOperation(true);
             }
+        }
+
+        /// <summary>
+        /// 设置是否可以执行解析操作
+        /// </summary>
+        /// <param name="isEnable"></param>
+        private void SetCanOperation(Boolean isEnable)
+        {
+            button_operation.Enabled = isEnable;
+            progressBar_operation.Visible = !isEnable;
+            this.SetOperationProcess(0);
+        }
+
+        /// <summary>
+        /// 设置进度条显示值
+        /// </summary>
+        /// <param name="curValue"></param>
+        private void SetOperationProcess(int curValue)
+        {
+            progressBar_operation.Value = curValue;
         }
 
         /// <summary>
@@ -213,32 +287,32 @@ namespace WindowsFormsApplication1
             return rst;
         }
 
-        
+
         /// <summary>  
         /// 替换末尾位置中指定的文件扩展名  
         /// </summary>  
-        /// <param name="s">源串</param>  
+        /// <param name="sourceStr">源串</param>  
         /// <param name="searchStr">查找的串</param>  
         /// <param name="replaceStr">替换的目标串</param>  
-        private string CutEndStr(string s, string searchStr, string replaceStr)
+        private string CutEndStr(string sourceStr, string searchStr, string replaceStr)
         {
-            var result = s;
+            var result = sourceStr;
             try
             {
                 if (string.IsNullOrEmpty(result))
                 {
                     return result;
                 }
-                if (s.Length < searchStr.Length)
+                if (sourceStr.Length < searchStr.Length)
                 {
                     return result;
                 }
-                if (s.IndexOf(searchStr, s.Length - searchStr.Length, searchStr.Length, StringComparison.Ordinal) > -1)
+                if (sourceStr.IndexOf(searchStr, sourceStr.Length - searchStr.Length, searchStr.Length, StringComparison.Ordinal) > -1)
                 {
-                    result = s.Substring(0, s.Length - searchStr.Length);
+                    result = sourceStr.Substring(0, sourceStr.Length - searchStr.Length);
                     result += replaceStr;
                 }
-                
+
                 return result;
             }
             catch (Exception e)
@@ -246,25 +320,7 @@ namespace WindowsFormsApplication1
                 return result;
             }
         }
-
     }
 
-    public class JsonFrameData
-    {
-        public int x { get; set; }
-        public int y { get; set; }
-        public int w { get; set; }
-        public int h { get; set; }
-        public int offX { get; set; }
-        public int offY { get; set; }
-        public int sourceW { get; set; }
-        public int sourceH { get; set; }
 
-    }
-
-    public class JsonData
-    {
-        public string file { get; set; }
-        public Dictionary<string, JsonFrameData> frames { get; set; }
-    }
 }
