@@ -172,7 +172,7 @@
             this.linkLabel1.Size = new System.Drawing.Size(119, 12);
             this.linkLabel1.TabIndex = 10;
             this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "http://kktoo.com";
+            this.linkLabel1.Text = "wengwx@dingtalk.com";
             // 
             // label_version
             // 
