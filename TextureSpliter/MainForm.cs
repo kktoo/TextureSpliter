@@ -117,6 +117,7 @@ namespace spliter
         {
             int invalidCode = 0;
             string invalidInfo = "";
+            StreamReader file = null;
 
             //检查合法性
             do
@@ -151,6 +152,19 @@ namespace spliter
                 catch (Exception folderException)
                 {
                     invalidCode = 4;
+                    invalidInfo = "创建输出目录失败." + folderException.Message;
+                    break;
+                }
+
+                //读取数据文件
+                try
+                {
+                    file = File.OpenText(dataPath);
+                }
+                catch (Exception e)
+                {
+                    invalidCode = 5;
+                    invalidInfo = "读取数据文件失败." + e.Message;
                     break;
                 }
 
@@ -161,20 +175,31 @@ namespace spliter
 
             if (0 != invalidCode)
             {
-                string info = "哦豁~出错了." + invalidInfo + "\r\n" + "错误码：" + invalidCode;
+                if (string.IsNullOrEmpty(invalidInfo))
+                {
+                    invalidInfo = "未知错误.";
+                }
+                string info = invalidInfo + "\r\n" + "错误码：" + invalidCode;
                 MessageBox.Show(info, "提示", MessageBoxButtons.OK);
                 return;
             }
-
-            //禁用解析操作，避免等待期连续点击
-            this.SetCanOperation(false);
-
+            
             int successNum = 0;
             int failedNum = 0;
-            using (StreamReader file = File.OpenText(dataPath))
+
+            try
             {
+                //解析数据文件
                 JsonSerializer se = new JsonSerializer();
                 JsonData jsonData = se.Deserialize(file, typeof(JsonData)) as JsonData;
+                if (null == jsonData || null == jsonData.file || null == jsonData.frames)
+                {
+                    throw new Exception("请检查数据格式是否合法.");
+                }
+
+                //禁用解析操作，避免等待期连续点击
+                this.SetCanOperation(false);
+
                 int processMaxNum = jsonData.frames.Count;
                 foreach (var item in jsonData.frames)
                 {
@@ -203,6 +228,15 @@ namespace spliter
                     }
                     this.SetOperationProcess(percentNum);
                 }
+            }
+            catch (Exception e)
+            {
+                DialogResult msgboxError = MessageBox.Show("解析出错." + e.Message, "提示", MessageBoxButtons.OK);
+                if(DialogResult.OK == msgboxError)
+                {
+                    this.SetCanOperation(true);
+                }
+                return;
             }
 
             string parseMsg = "";
