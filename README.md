@@ -2,15 +2,18 @@
 
 白鹭图集软件TextureMerger的反向工具，从TextureMerger输出的png文件和json文件，反向解析出单个图片，方便二次修改。
 
-支持运行于windows，需要.net framework 4.5.2及以上。不需安装，解压即可使用。
+支持运行于windows，依赖.net framework 3.5。
+
+不需安装，解压即可使用。
 
 开发工具：VisualStudio 2015
 
 # ChangeLog
 
-## 1.0.4 / 2019-09-20
+## 1.0.4 / 2019-09-21
 
 - 增加对读取文件错误，解析文件格式不对等异常情况的处理
+- 对.net framework的版本依赖从4.5.2降低为3.5，提高了对win7系统的兼容性
 
 ## 1.0.3 / 2019-08-02
 

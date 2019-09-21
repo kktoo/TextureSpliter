@@ -351,6 +351,7 @@ namespace spliter
             }
             catch (Exception e)
             {
+                Console.WriteLine("[MainForm, CutEndStr]" + e.Message);
                 return result;
             }
         }
